@@ -114,7 +114,7 @@ export default function Game() {
   const renderProblem = () => {
     if (!currentProblem) return null;
     return (
-      <>
+      <div className="w-[calc(100vw/3)] rounded-3xl border border-gray-300 py-6">
         <div className="text-xl">
           <div className="text-center">{currentProblem.problem}</div>
           <div className="text-center">
@@ -131,16 +131,20 @@ export default function Game() {
         <div className="text-md mt-6 text-center text-slate-500">
           {currentProblem.title} / {currentProblem.author}
         </div>
-      </>
+      </div>
     );
   };
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">
-      {/* <h1 className="mb-6 text-3xl">タイピングゲーム</h1> */}
       {timeLeft > 0 ? (
         <>
-          <div className="text-xl">残り時間: {timeLeft} 秒</div>
+          <div className="text-xl">
+            残り時間:
+            <span className={`${timeLeft <= 5 ? "text-rose-500" : ""} ml-2`}>
+              {timeLeft}秒
+            </span>
+          </div>
           <div className="my-8">{renderProblem()}</div>
           <div className="text-xl">スコア: {score}</div>
         </>
