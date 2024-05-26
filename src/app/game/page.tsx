@@ -81,6 +81,10 @@ export default function Game() {
         }
       }
     }
+    // ゲーム開始直前のページに戻る
+    if (e.key === "Escape") {
+      router.push("/confirmation");
+    }
   };
 
   const renderProblem = () => {
