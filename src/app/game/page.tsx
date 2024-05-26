@@ -86,16 +86,24 @@ export default function Game() {
   const renderProblem = () => {
     if (!currentProblem) return null;
     return (
-      <div className="text-xl">
-        <div className="text-center">{currentProblem.problem}</div>
-        <div className="text-center">
-          {currentProblem.answer.split("").map((char: string, index: any) => (
-            <span key={index} style={{ opacity: index < typedIndex ? 0.5 : 1 }}>
-              {char}
-            </span>
-          ))}
+      <>
+        <div className="text-xl">
+          <div className="text-center">{currentProblem.problem}</div>
+          <div className="text-center">
+            {currentProblem.answer.split("").map((char: string, index: any) => (
+              <span
+                key={index}
+                className={`${index < typedIndex ? "text-sky-500" : ""}`}
+              >
+                {char}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+        <div className="text-md mt-6 text-center text-slate-500">
+          {currentProblem.title} / {currentProblem.author}
+        </div>
+      </>
     );
   };
 
