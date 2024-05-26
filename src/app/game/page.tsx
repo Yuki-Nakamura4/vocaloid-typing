@@ -2,6 +2,9 @@
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { problems } from "../../data/problems";
+import typeSound from "../../../public/sound/typeSound.mp3";
+import correctSound from "../../../public/sound/correctSound.mp3";
+import missTypeSound from "../../../public/sound/missSound.mp3";
 
 export default function Game() {
   const router = useRouter();
@@ -11,6 +14,22 @@ export default function Game() {
   const [typedIndex, setTypedIndex] = useState(0); // 入力された文字数
   const [typedAnswer, setTypedAnswer] = useState("");
   const [usedProblems, setUsedProblems] = useState(new Set());
+
+  // サウンドの読み込み
+  const typeAudio = new Audio(typeSound);
+  const correctAudio = new Audio(correctSound);
+  const missTypeAudio = new Audio(missTypeSound);
+
+  const playTypeSound = () => {
+    typeAudio.play();
+  };
+  const playCorrectSound = () => {
+    correctAudio.play();
+  };
+
+  const playMissTypeSound = () => {
+    missTypeAudio.play(); // Play missType sound
+  };
 
   useEffect(() => {
     // タイマーのセットアップ
@@ -77,8 +96,13 @@ export default function Game() {
 
         if (typedIndex + 1 === currentProblem.answer.length) {
           setScore((prev) => prev + 100);
+          playCorrectSound();
           getRandomProblem();
+        } else {
+          playTypeSound();
         }
+      } else {
+        playMissTypeSound();
       }
     }
     // ゲーム開始直前のページに戻る
@@ -123,7 +147,9 @@ export default function Game() {
       ) : (
         <>
           {" "}
-          <div className="mb-4 text-xl">ゲーム終了！最終スコア: {score}</div>
+          <div className="mb-4 text-center text-xl">
+            ゲーム終了！ 最終スコア: {score}
+          </div>
           <button
             className="rounded-full bg-sky-500 px-4 py-2 text-white shadow-sm hover:bg-sky-600"
             onClick={() => {
