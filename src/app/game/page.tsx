@@ -2,6 +2,9 @@
 import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { problems } from "../../data/problems";
+import typeSound from "../../../public/sound/typeSound.mp3";
+import correctSound from "../../../public/sound/correctSound.mp3";
+import missTypeSound from "../../../public/sound/missSound.mp3";
 
 export default function Game() {
   const router = useRouter();
@@ -11,6 +14,22 @@ export default function Game() {
   const [typedIndex, setTypedIndex] = useState(0); // 入力された文字数
   const [typedAnswer, setTypedAnswer] = useState("");
   const [usedProblems, setUsedProblems] = useState(new Set());
+
+  // サウンドの読み込み
+  const typeAudio = new Audio(typeSound);
+  const correctAudio = new Audio(correctSound);
+  const missTypeAudio = new Audio(missTypeSound);
+
+  const playTypeSound = () => {
+    typeAudio.play();
+  };
+  const playCorrectSound = () => {
+    correctAudio.play();
+  };
+
+  const playMissTypeSound = () => {
+    missTypeAudio.play(); // Play missType sound
+  };
 
   useEffect(() => {
     // タイマーのセットアップ
@@ -77,23 +96,40 @@ export default function Game() {
 
         if (typedIndex + 1 === currentProblem.answer.length) {
           setScore((prev) => prev + 100);
+          playCorrectSound();
           getRandomProblem();
+        } else {
+          playTypeSound();
         }
+      } else {
+        playMissTypeSound();
       }
+    }
+    // ゲーム開始直前のページに戻る
+    if (e.key === "Escape") {
+      router.push("/confirmation");
     }
   };
 
   const renderProblem = () => {
     if (!currentProblem) return null;
     return (
-      <div className="text-xl">
-        <div className="text-center">{currentProblem.problem}</div>
-        <div className="text-center">
-          {currentProblem.answer.split("").map((char: string, index: any) => (
-            <span key={index} style={{ opacity: index < typedIndex ? 0.5 : 1 }}>
-              {char}
-            </span>
-          ))}
+      <div className="w-[calc(100vw/3)] rounded-3xl border border-gray-300 py-6">
+        <div className="text-xl">
+          <div className="text-center">{currentProblem.problem}</div>
+          <div className="text-center">
+            {currentProblem.answer.split("").map((char: string, index: any) => (
+              <span
+                key={index}
+                className={`${index < typedIndex ? "text-sky-500" : ""}`}
+              >
+                {char}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="text-md mt-6 text-center text-slate-500">
+          {currentProblem.title} / {currentProblem.author}
         </div>
       </div>
     );
@@ -101,17 +137,23 @@ export default function Game() {
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">
-      {/* <h1 className="mb-6 text-3xl">タイピングゲーム</h1> */}
       {timeLeft > 0 ? (
         <>
-          <div className="text-xl">残り時間: {timeLeft} 秒</div>
+          <div className="text-xl">
+            残り時間:
+            <span className={`${timeLeft <= 5 ? "text-rose-500" : ""} ml-2`}>
+              {timeLeft}秒
+            </span>
+          </div>
           <div className="my-8">{renderProblem()}</div>
           <div className="text-xl">スコア: {score}</div>
         </>
       ) : (
         <>
           {" "}
-          <div className="mb-4 text-xl">ゲーム終了！最終スコア: {score}</div>
+          <div className="mb-4 text-center text-xl">
+            ゲーム終了！ 最終スコア: {score}
+          </div>
           <button
             className="rounded-full bg-sky-500 px-4 py-2 text-white shadow-sm hover:bg-sky-600"
             onClick={() => {
