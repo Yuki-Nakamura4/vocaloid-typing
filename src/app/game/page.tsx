@@ -1,38 +1,33 @@
 "use client";
-import { useRouter } from "next/navigation";
 import React, { useState, useEffect } from "react";
+import { ConfirmationScreen } from "./_components/ConfirmationScreen"; // Import the Confirmation component
 import { problems } from "../../data/problems";
 import typeSound from "../../../public/sound/typeSound.mp3";
 import correctSound from "../../../public/sound/correctSound.mp3";
 import missTypeSound from "../../../public/sound/missSound.mp3";
+import { ResultScreen } from "./_components/ResultScreen";
+import { useRouter } from "next/navigation";
 
 export default function Game() {
   const router = useRouter();
-  const [currentProblem, setCurrentProblem] = useState<any>(null);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [currentProblem, setCurrentProblem] = useState<any>();
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(60); // 1分
-  const [typedIndex, setTypedIndex] = useState(0); // 入力された文字数
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [typedIndex, setTypedIndex] = useState(0);
   const [typedAnswer, setTypedAnswer] = useState("");
   const [usedProblems, setUsedProblems] = useState(new Set());
+  const [showConfirmation, setShowConfirmation] = useState(true);
 
-  // サウンドの読み込み
   const typeAudio = new Audio(typeSound);
   const correctAudio = new Audio(correctSound);
   const missTypeAudio = new Audio(missTypeSound);
 
-  const playTypeSound = () => {
-    typeAudio.play();
-  };
-  const playCorrectSound = () => {
-    correctAudio.play();
-  };
-
-  const playMissTypeSound = () => {
-    missTypeAudio.play(); // Play missType sound
-  };
+  const playTypeSound = () => typeAudio.play();
+  const playCorrectSound = () => correctAudio.play();
+  const playMissTypeSound = () => missTypeAudio.play();
 
   useEffect(() => {
-    // タイマーのセットアップ
     const timer = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
     }, 1000);
@@ -41,15 +36,14 @@ export default function Game() {
   }, []);
 
   useEffect(() => {
-    getRandomProblem();
-  }, []);
+    if (!showConfirmation) getRandomProblem();
+  }, [showConfirmation]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [currentProblem, typedIndex]);
 
-  // problemsのインデックスをシャッフル
   const shuffledIndices = problems
     .map((_, index) => index)
     .sort(() => Math.random() - 0.5);
@@ -64,20 +58,13 @@ export default function Game() {
       }
     }
 
-    // if(randaomIndex)だとindexが0の場合に問題が出ないので注意
     if (randomIndex !== null) {
-      // 使用済み問題セットに追加
       setUsedProblems((prev) => new Set(prev).add(randomIndex));
-
-      // 問題を設定
       setCurrentProblem(problems[randomIndex]);
       setTypedIndex(0);
       setTypedAnswer("");
     } else {
-      console.error("すべての問題が使用済みです。");
       setUsedProblems(new Set());
-
-      // 新しい問題を選択してゲームを継続
       const newRandomIndex = Math.floor(Math.random() * problems.length);
       setCurrentProblem(problems[newRandomIndex]);
       setTypedIndex(0);
@@ -85,7 +72,6 @@ export default function Game() {
     }
   };
 
-  // キーボードの入力を監視
   const handleKeyDown = (e: { key: string }) => {
     if (timeLeft > 0 && currentProblem) {
       const typedChar = e.key.toLowerCase();
@@ -105,7 +91,12 @@ export default function Game() {
         playMissTypeSound();
       }
     }
-    // ゲーム開始直前のページに戻る
+
+    if (e.key === "Enter" && showConfirmation) {
+      setGameStarted(true); // ゲームを開始
+      setShowConfirmation(false); // 確認画面を非表示
+    }
+
     if (e.key === "Escape") {
       router.push("/confirmation");
     }
@@ -137,7 +128,8 @@ export default function Game() {
 
   return (
     <div className="flex h-screen flex-col items-center justify-center">
-      {timeLeft > 0 ? (
+      {!gameStarted && <ConfirmationScreen />}
+      {gameStarted && timeLeft > 0 ? (
         <>
           <div className="text-xl">
             残り時間:
@@ -149,20 +141,7 @@ export default function Game() {
           <div className="text-xl">スコア: {score}</div>
         </>
       ) : (
-        <>
-          {" "}
-          <div className="mb-4 text-center text-xl">
-            ゲーム終了！ 最終スコア: {score}
-          </div>
-          <button
-            className="rounded-full bg-sky-500 px-4 py-2 text-white shadow-sm hover:bg-sky-600"
-            onClick={() => {
-              router.push("/");
-            }}
-          >
-            戻る
-          </button>
-        </>
+        <ResultScreen score={score} />
       )}
     </div>
   );
