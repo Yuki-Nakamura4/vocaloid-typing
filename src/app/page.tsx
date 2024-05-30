@@ -14,29 +14,19 @@ export default function Home() {
       if (index < title.length) {
         setText((prev) => prev + title.charAt(index));
         index++;
-        const timerId = window.setTimeout(typing, 100); // タイピング速度(ミリ秒単位)
+        const timerId = window.setTimeout(typing, 100);
         return timerId;
       } else {
-        setIsCompleted(true); // テキストがすべて表示されたら状態を更新
+        setIsCompleted(true);
       }
     };
 
     const timerId = typing();
-    // コンポーネントがアンマウントされたときにタイマーをクリア
     return () => clearTimeout(timerId);
   }, []);
 
   return (
-    <div
-      className="flex h-screen flex-col items-center justify-center"
-      // style={{
-      //   backgroundImage: "url(/test_miku.png)",
-      //   backgroundSize: "cover",
-      //   backgroundPosition: "center",
-      //   width: "100vw",
-      //   height: "100vh",
-      // }}
-    >
+    <div className="flex h-screen flex-col items-center justify-center">
       <div className="mb-6 text-3xl ">
         <span className="text-3xl">{text}</span>
         {/* 文字が表示し終わったらテキストカーソルを点滅させる */}
@@ -49,7 +39,7 @@ export default function Home() {
       <button
         className="mb-6 rounded-full bg-sky-500 px-6 py-3 text-white shadow-sm hover:bg-sky-600"
         onClick={() => {
-          router.push("/confirmation");
+          router.push("/game");
         }}
       >
         プレイする
